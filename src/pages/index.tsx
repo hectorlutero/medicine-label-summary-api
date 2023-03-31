@@ -3,17 +3,38 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { GetStaticProps, InferGetStaticPropsType } from "next";
+import { useState } from "react";
+
+const fdaKey = process.env.OPEN_FDA_API;
 
 const inter = Inter({ subsets: ["latin"] });
 
-type Medications = {
-  title: string;
+type MedicationPurpose = {
   content: string;
+};
+
+type MedicationsResults = {
+  purposes: MedicationPurpose[];
+};
+
+type Medications = {
+  results: MedicationsResults[];
 };
 
 export default function Home({
   medications,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const [cardClicked, setCardClicked] = useState(false);
+
+  const getStyle = () => {
+    if (cardClicked) return styles.medicineCardActive;
+    else return styles.medicineCard;
+  };
+
+  const handleCardClicked = () => {
+    setCardClicked(!cardClicked);
+  };
+
   return (
     <>
       <Head>
@@ -27,8 +48,30 @@ export default function Home({
         <h1 className={styles.h1}>Medicines Label Summarizer</h1>
         <div className={styles.center}>
           <ul>
-            {medications.map(medication => (
-              <li key={medication.title}>{medication.title}</li>
+            {medications.results.map(medication => (
+              <div
+                className={getStyle()}
+                key={medication.openfda.generic_name}
+                onClick={handleCardClicked}
+              >
+                <strong>{medication.openfda.generic_name}</strong>
+                {cardClicked ? (
+                  <>
+                    <p>
+                      <strong>Purpose:</strong> {medication.purpose}
+                    </p>
+                    <p>
+                      <strong>Ingredients:</strong>{" "}
+                      {medication.active_ingredient}
+                    </p>
+                    <p>
+                      <strong>{"Don't use: "}</strong> {medication.do_not_use}
+                    </p>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
             ))}
           </ul>
         </div>
@@ -99,10 +142,12 @@ export default function Home({
 export const getStaticProps: GetStaticProps<{
   medications: Medications[];
 }> = async () => {
-  const res = fetch("https://jsonplaceholder.typicode.com/posts?limit=10");
+  const res = fetch(
+    `https://api.fda.gov/drug/label.json?=${fdaKey}&search=acetaminophen`
+  );
   console.log(res);
   const medications: Medications[] = await (await res).json();
-
+  console.log(medications.results[0]);
   return {
     props: {
       medications,
