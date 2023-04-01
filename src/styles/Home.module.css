@@ -82,6 +82,9 @@
   align-items: center;
   position: relative;
   padding: 4rem 0;
+  flex-direction: column;
+  width: 50%;
+  max-width: 720px;
 }
 
 .center::before {
@@ -181,7 +184,7 @@
 
 .medicineCardActive {
   width: 35em;
-  height: 20em;
+  min-height: 20em;
   display: flex;
   padding: 2em;
   flex-direction: column;
@@ -192,6 +195,18 @@
   background-color: #ffffff15;
   box-shadow: 0 0 26px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease-in-out;
+}
+
+.cardParagraph {
+  align-self: start;
+  opacity: 0;
+  transition: all 1s ease-in-out;
+}
+
+.cardParagraphActive {
+  align-self: start;
+  opacity: 1;
+  transition: all 1.5s ease-in-out;
 }
 
 .medicineCard {
@@ -205,6 +220,25 @@
   background-color: #ffffff15;
   box-shadow: 0 0 26px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease-in-out;
+}
+
+.searchboxContainer {
+  width: 100%;
+}
+
+.searchboxContainer input {
+  border: 0;
+  margin-bottom: 2rem;
+  padding: 1em;
+  width: 100%;
+  border-radius: 5em;
+  border: 1px solid transparent;
+  transition: 0.2s all ease-in-out;
+}
+
+.searchboxContainer input:focus-visible {
+  border: 1px solid #16abffa6;
+  outline: none;
 }
 
 .medicineCard:hover {

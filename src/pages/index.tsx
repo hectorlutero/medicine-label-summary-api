@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { GetStaticProps, InferGetStaticPropsType } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const fdaKey = process.env.OPEN_FDA_API;
 
@@ -24,17 +24,59 @@ type Medications = {
 export default function Home({
   medications,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const [items, setItems] = useState(false);
+  const [query, setQuery] = useState(false);
   const [cardClicked, setCardClicked] = useState(false);
+  const [showParagraph, setShowParagraph] = useState(false);
 
-  const getStyle = () => {
+  const getMedicineCardActiveStyle = () => {
     if (cardClicked) return styles.medicineCardActive;
     else return styles.medicineCard;
+  };
+  const getParagraphsActiveStyle = () => {
+    if (showParagraph) {
+      return styles.cardParagraphActive;
+    }
+    return styles.cardParagraph;
   };
 
   const handleCardClicked = () => {
     setCardClicked(!cardClicked);
+    setShowParagraph(!showParagraph);
   };
 
+  const handleSearch = (event: {
+    key: string;
+    target: { value: boolean | ((prevState: boolean) => boolean) };
+  }) => {
+    if (event.key === "Enter") {
+      return setQuery(event.target.value);
+    }
+  };
+  useEffect(() => {
+    const medication = query;
+    fetch(
+      `https://api.fda.gov/drug/label.json?=${fdaKey}&search=openfda.generic_name:${medication}+openfda.brand_name${medication}`
+    )
+      .then(res => res.json())
+      .then(
+        result => {
+          setIsLoaded(true);
+          setItems(result.results);
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        error => {
+          setIsLoaded(true);
+          setError(error);
+        }
+      );
+  }, [query]);
+
+  console.log(items);
   return (
     <>
       <Head>
@@ -47,33 +89,45 @@ export default function Home({
         <div className={styles.description}></div>
         <h1 className={styles.h1}>Medicines Label Summarizer</h1>
         <div className={styles.center}>
-          <ul>
-            {medications.results.map(medication => (
-              <div
-                className={getStyle()}
-                key={medication.openfda.generic_name}
-                onClick={handleCardClicked}
-              >
-                <strong>{medication.openfda.generic_name}</strong>
-                {cardClicked ? (
-                  <>
-                    <p>
-                      <strong>Purpose:</strong> {medication.purpose}
-                    </p>
-                    <p>
-                      <strong>Ingredients:</strong>{" "}
-                      {medication.active_ingredient}
-                    </p>
-                    <p>
-                      <strong>{"Don't use: "}</strong> {medication.do_not_use}
-                    </p>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </div>
-            ))}
-          </ul>
+          <div className={styles.searchboxContainer}>
+            <input type="text" placeholder="Search" onKeyDown={handleSearch} />
+          </div>
+          {!isLoaded ? (
+            <div>...Loading</div>
+          ) : (
+            <ul>
+              {items
+                ? items.map(medication => (
+                    <div
+                      className={getMedicineCardActiveStyle()}
+                      key={medication.openfda.generic_name}
+                      onClick={handleCardClicked}
+                    >
+                      <strong>{medication.openfda.generic_name}</strong>
+                      <div className={getParagraphsActiveStyle()}>
+                        {cardClicked ? (
+                          <>
+                            <p>
+                              <strong>Purpose:</strong> {medication.purpose}
+                            </p>
+                            <p>
+                              <strong>Ingredients:</strong>{" "}
+                              {medication.active_ingredient}
+                            </p>
+                            <p>
+                              <strong>{"Don't use: "}</strong>{" "}
+                              {medication.do_not_use}
+                            </p>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                : null}
+            </ul>
+          )}
         </div>
 
         <div className={styles.grid}>
@@ -142,9 +196,7 @@ export default function Home({
 export const getStaticProps: GetStaticProps<{
   medications: Medications[];
 }> = async () => {
-  const res = fetch(
-    `https://api.fda.gov/drug/label.json?=${fdaKey}&search=acetaminophen`
-  );
+  const res = fetch(`https://api.fda.gov/drug/label.json?=${fdaKey}&search={}`);
   console.log(res);
   const medications: Medications[] = await (await res).json();
   console.log(medications.results[0]);
