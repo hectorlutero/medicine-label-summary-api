@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import SearchBox from "../SearchBox/SearchBox";
 import MedicationCards from "../MedicationCards/MedicationCards";
-
 export default function UserInterface() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [query, setQuery] = useState("");
