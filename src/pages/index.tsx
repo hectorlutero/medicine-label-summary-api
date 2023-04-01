@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { GetStaticProps, InferGetStaticPropsType } from "next";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 const fdaKey = process.env.OPEN_FDA_API;
 
@@ -21,15 +21,21 @@ type Medications = {
   results: MedicationsResults[];
 };
 
+interface SearchQuery {
+  key: String;
+  target: {
+    value: string;
+  };
+}
+
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const [items, setItems] = useState(false);
-  const [query, setQuery] = useState(false);
+  const [items, setItems] = useState([]);
+  const [query, setQuery] = useState("");
   const [cardClicked, setCardClicked] = useState(false);
   const [showParagraph, setShowParagraph] = useState(false);
 
-  console.log(query);
   const getMedicineCardActiveStyle = () => {
     if (cardClicked) return styles.medicineCardActive;
     else return styles.medicineCard;
@@ -46,12 +52,9 @@ export default function Home() {
     setShowParagraph(!showParagraph);
   };
 
-  const handleSearch = (event: {
-    key: string;
-    target: { value: boolean | ((prevState: boolean) => boolean) };
-  }) => {
+  const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      return setQuery(event.target.value);
+      return setQuery(event.currentTarget.value);
     }
   };
   useEffect(() => {
@@ -98,36 +101,43 @@ export default function Home() {
           ) : (
             <ul>
               {items ? (
-                items.map(medication => (
-                  <div
-                    className={getMedicineCardActiveStyle()}
-                    key={medication.openfda.generic_name}
-                    onClick={handleCardClicked}
-                  >
-                    <h4>
-                      <strong>{medication.openfda.generic_name}</strong>
-                    </h4>
-                    <div className={getParagraphsActiveStyle()}>
-                      {cardClicked ? (
-                        <>
-                          <p>
-                            <strong>Purpose:</strong> {medication.purpose}
-                          </p>
-                          <p>
-                            <strong>Ingredients:</strong>{" "}
-                            {medication.active_ingredient}
-                          </p>
-                          <p>
-                            <strong>{"Don't use: "}</strong>{" "}
-                            {medication.do_not_use}
-                          </p>
-                        </>
-                      ) : (
-                        <></>
-                      )}
+                items.map(
+                  (medication: {
+                    openfda: { generic_name: string };
+                    purpose: string;
+                    active_ingredient: string;
+                    do_not_use: string;
+                  }) => (
+                    <div
+                      className={getMedicineCardActiveStyle()}
+                      key={medication.openfda.generic_name}
+                      onClick={handleCardClicked}
+                    >
+                      <h4>
+                        <strong>{medication.openfda.generic_name}</strong>
+                      </h4>
+                      <div className={getParagraphsActiveStyle()}>
+                        {cardClicked ? (
+                          <>
+                            <p>
+                              <strong>Purpose:</strong> {medication.purpose}
+                            </p>
+                            <p>
+                              <strong>Ingredients:</strong>{" "}
+                              {medication.active_ingredient}
+                            </p>
+                            <p>
+                              <strong>{"Don't use: "}</strong>{" "}
+                              {medication.do_not_use}
+                            </p>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )
+                )
               ) : (
                 <div>Not found</div>
               )}
