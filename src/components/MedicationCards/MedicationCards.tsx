@@ -1,7 +1,8 @@
 import { useState } from "react";
 import styles from "./MedicationCards.module.css";
+import MedicationCard from "../MedicationCard/MedicationCard";
 
-interface Items {
+export interface Items {
   openfda: {
     generic_name: string;
   };
@@ -24,12 +25,6 @@ const MedicationCards = (props: { items: Items[] }) => {
     if (cardClicked) return styles.medicineCardActive;
     else return styles.medicineCard;
   };
-  const getParagraphsActiveStyle = () => {
-    if (showParagraph) {
-      return styles.cardParagraphActive;
-    }
-    return styles.cardParagraph;
-  };
 
   return (
     <>
@@ -41,27 +36,11 @@ const MedicationCards = (props: { items: Items[] }) => {
               key={medication.openfda.generic_name}
               onClick={handleCardClicked}
             >
-              <h4>
-                <strong>{medication.openfda.generic_name}</strong>
-              </h4>
-              <div className={getParagraphsActiveStyle()}>
-                {cardClicked ? (
-                  <>
-                    <p>
-                      <strong>Purpose:</strong> {medication.purpose}
-                    </p>
-                    <p>
-                      <strong>Ingredients:</strong>{" "}
-                      {medication.active_ingredient}
-                    </p>
-                    <p>
-                      <strong>{"Don't use: "}</strong> {medication.do_not_use}
-                    </p>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </div>
+              <MedicationCard
+                medication={medication}
+                cardClicked={cardClicked}
+                showParagraph={showParagraph}
+              />
             </div>
           ))
         ) : (
