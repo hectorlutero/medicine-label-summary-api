@@ -1,0 +1,58 @@
+.medicineCardActive {
+    width: 35em;
+    min-height: 20em;
+    display: flex;
+    padding: 2em;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    border-radius: 0.4rem;
+    background-color: #ffffff15;
+    box-shadow: 0 0 26px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease-in-out;
+}
+
+.cardParagraph {
+    align-self: start;
+    opacity: 0;
+    transition: all 1s ease-in-out;
+}
+
+.cardParagraphActive {
+    align-self: start;
+    opacity: 1;
+    transition: all 1.5s ease-in-out;
+}
+
+.medicineCardActive h4 {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.medicineCard h4 {
+    text-align: center;
+}
+
+.medicineCard {
+    width: 30em;
+    height: 10em;
+    padding: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: var(--font-mono);
+    border-radius: 0.4rem;
+    background-color: #ffffff15;
+    box-shadow: 0 0 26px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease-in-out;
+}
+
+
+.medicineCard:hover {
+    background-color: #ffffff3a;
+    box-shadow: 0 0 26px rgba(0, 0, 0, 0.3);
+    margin-top: -10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
